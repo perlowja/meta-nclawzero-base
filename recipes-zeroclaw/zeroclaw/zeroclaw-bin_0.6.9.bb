@@ -37,11 +37,14 @@ SRC_URI = " \
     file://zeroclaw.toml \
 "
 
-# Per-arch SHA256 — bitbake picks the one matching TARGET_ARCH.
-# Verified against upstream SHA256SUMS sidecar on the release.
-SRC_URI[bin.sha256sum] = "INVALID-override-for-this-TARGET_ARCH"
-SRC_URI[bin.sha256sum]:aarch64 = "25e5a50a2870cfab14a2767d66650b188ca0ccbb38d9e895dd09b6d7399d73f6"
-SRC_URI[bin.sha256sum]:arm = "8555973fd8a5023647738264fee25092b3f06fdfe6eb193fad230d8deea973b7"
+# Per-arch SHA256 — indirected through a plain variable because
+# BitBake varflag syntax (SRC_URI[bin.sha256sum]) does not accept
+# :override suffixes. Override ZEROCLAW_SHA; the assignment below
+# propagates the arch-correct value to the varflag.
+ZEROCLAW_SHA ?= "INVALID-override-for-this-TARGET_ARCH"
+ZEROCLAW_SHA:aarch64 = "25e5a50a2870cfab14a2767d66650b188ca0ccbb38d9e895dd09b6d7399d73f6"
+ZEROCLAW_SHA:arm = "8555973fd8a5023647738264fee25092b3f06fdfe6eb193fad230d8deea973b7"
+SRC_URI[bin.sha256sum] = "${ZEROCLAW_SHA}"
 
 COMPATIBLE_HOST = "(aarch64|arm).*-linux"
 

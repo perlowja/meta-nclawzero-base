@@ -41,12 +41,14 @@ ZTERM_TRIPLE:x86-64  = "x86_64-unknown-linux-gnu"
 
 SRC_URI = "https://github.com/perlowja/zterm/releases/download/v${ZTERM_VERSION}/zterm-${ZTERM_VERSION}-${ZTERM_TRIPLE}.tar.gz;name=bin"
 
-# Per-arch SHA256 — filled in from the release's SHA256SUMS sidecar
-# after the GH Actions release workflow completes.
-# TODO: populate these once the v0.2.2 release assets land.
-SRC_URI[bin.sha256sum] = "INVALID-override-for-this-TARGET_ARCH"
-SRC_URI[bin.sha256sum]:aarch64 = "8251b441f911d76a01a1104688059ef5b9a08c82d01aaa7a040959495c2b0eb4"
-SRC_URI[bin.sha256sum]:x86-64  = "0d2fcf4e1793c378881c7b564a224b5c7653802a1c2ae9c02194c6349a9bd975"
+# Per-arch SHA256 — indirected through a plain variable because
+# BitBake varflag syntax (SRC_URI[bin.sha256sum]) does not accept
+# :override suffixes. Override ZTERM_SHA; the assignment below
+# propagates the arch-correct value to the varflag.
+ZTERM_SHA ?= "INVALID-override-for-this-TARGET_ARCH"
+ZTERM_SHA:aarch64 = "8251b441f911d76a01a1104688059ef5b9a08c82d01aaa7a040959495c2b0eb4"
+ZTERM_SHA:x86-64  = "0d2fcf4e1793c378881c7b564a224b5c7653802a1c2ae9c02194c6349a9bd975"
+SRC_URI[bin.sha256sum] = "${ZTERM_SHA}"
 
 COMPATIBLE_HOST = "(aarch64|x86_64).*-linux"
 

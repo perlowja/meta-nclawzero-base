@@ -22,11 +22,15 @@ NODEJS_ARCH:arm = "armv7l"
 
 SRC_URI = "https://nodejs.org/dist/v${PV}/node-v${PV}-linux-${NODEJS_ARCH}.tar.xz;name=node"
 
-# Per-arch SHA256 — bitbake picks the one matching TARGET_ARCH.
+# Per-arch SHA256 — indirected through a plain variable because
+# BitBake varflag syntax (SRC_URI[node.sha256sum]) does not accept
+# :override suffixes. Override NODEJS_SHA instead; the assignment
+# below propagates the arch-correct value to the varflag.
 # Verified against upstream SHASUMS256.txt.
-SRC_URI[node.sha256sum] = "INVALID-override-for-this-TARGET_ARCH"
-SRC_URI[node.sha256sum]:aarch64 = "e9e1930fd321a470e29bb68f30318bf58e3ecb4acb4f1533fb19c58328a091fe"
-SRC_URI[node.sha256sum]:arm = "2ebc6746e517f345da340ec76a108203eb6c2365391eb525c0e0dd6135b0b9df"
+NODEJS_SHA ?= "INVALID-override-for-this-TARGET_ARCH"
+NODEJS_SHA:aarch64 = "e9e1930fd321a470e29bb68f30318bf58e3ecb4acb4f1533fb19c58328a091fe"
+NODEJS_SHA:arm = "2ebc6746e517f345da340ec76a108203eb6c2365391eb525c0e0dd6135b0b9df"
+SRC_URI[node.sha256sum] = "${NODEJS_SHA}"
 
 S = "${WORKDIR}/node-v${PV}-linux-${NODEJS_ARCH}"
 
