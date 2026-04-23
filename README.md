@@ -82,11 +82,29 @@ All fetches happen at build time from public upstream sources.
   `local.conf` templates, Jetson GCC14/glibc bbappend guidance.
 - **`FLASH.md`** — writing images to SD cards on Raspberry Pi and
   Jetson Orin Nano (`bmaptool`, `dd`, macOS-specific notes).
+- **`docker/README.md`** — Docker deliverables: `nclawzero-demo`
+  (one-command interactive bench with zterm TUI + live agent) and
+  `nclawzero-agent` (headless runtime for compose/k8s). Published
+  to `ghcr.io/perlowja`. If you just want to feel the stack
+  before committing to hardware, this is the fastest path.
 
 New to Yocto? The [Yocto Project Quick Build](https://docs.yoctoproject.org/brief-yoctoprojectqs/)
 is a 20-minute walkthrough that builds `core-image-minimal` for
 qemu — everything `meta-nclawzero-base` does is plain Yocto on top
 of that foundation.
+
+### Try the stack in 30 seconds (Docker)
+
+Before touching Yocto or flashing hardware, you can kick the tires
+on any x86_64 / arm64 machine with Docker installed:
+
+```bash
+docker run -it --rm ghcr.io/perlowja/nclawzero-demo
+```
+
+That's it — zterm TUI opens, already connected to a live ZeroClaw
+agent inside the container. See `docker/README.md` for the
+`nclawzero-agent` headless variant.
 
 ## Layer compatibility
 
