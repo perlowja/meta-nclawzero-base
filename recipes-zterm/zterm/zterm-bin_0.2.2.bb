@@ -53,10 +53,11 @@ SRC_URI[bin.sha256sum] = "${ZTERM_SHA}"
 COMPATIBLE_HOST = "(aarch64|x86_64).*-linux"
 
 # zterm's reqwest→openssl-sys chain needs libssl.so.3 + libcrypto.so.3
-# at runtime. In scarthgap poky the openssl 3.x recipe splits these
-# into `libssl3` and `libcrypto3` subpackages — naming the meta
-# `openssl` package here fails the strict shlib file-rdeps QA check.
-RDEPENDS:${PN} = "ca-certificates libssl3 libcrypto3"
+# at runtime. In scarthgap poky, openssl_3.5.5.bb splits its PACKAGES
+# into version-less `libssl` and `libcrypto` (which provide the .so.3
+# files). Package names are NOT `libssl3`/`libcrypto3` as in some
+# other distros — they're the version-less names here.
+RDEPENDS:${PN} = "ca-certificates libssl libcrypto"
 
 # The release tarball layout (per release.yml):
 #   zterm-${VERSION}-${TRIPLE}/zterm
