@@ -75,14 +75,31 @@ the story):
 
 #### NVIDIA Jetson
 
-| Module | Arch | MACHINE (meta-tegra) | `base` | `desktop` | `agent` |
-|---|---|---|---|---|---|
-| Jetson Orin Nano 8GB Dev Kit | aarch64 | `jetson-orin-nano-devkit` | ✅ | ✅ | ✅ |
-| Jetson Orin NX / AGX Orin | aarch64 | (per board) | ✅ | ✅ | ✅ |
+| Module | meta-tegra branch | MACHINE | Status |
+|---|---|---|---|
+| Jetson Orin Nano 8 GB Devkit | `scarthgap-l4t-r36.3.0` | `jetson-orin-nano-devkit` | ✅ maintainer-tested (SD boot) |
+| Jetson Orin NX 8 / 16 GB | `scarthgap-l4t-r36.3.0` | `jetson-orin-nx-devkit` | 🟡 recipe-compatible, untested (eMMC / NVMe via `flash.sh`) |
+| Jetson AGX Orin 32 / 64 GB | `scarthgap-l4t-r36.3.0` | `jetson-agx-orin-devkit` | 🟡 recipe-compatible, untested (eMMC / NVMe via `flash.sh`) |
+| Jetson Xavier NX | `scarthgap-l4t-r35.x.x` | `jetson-xavier-nx-devkit` | 🟡 recipe-compatible, needs r35 branch |
+| Jetson AGX Xavier | `scarthgap-l4t-r35.x.x` | `jetson-agx-xavier-devkit` | 🟡 recipe-compatible, needs r35 branch |
+| Jetson Nano (legacy 4 GB) | `scarthgap-l4t-r32.x.x` | `jetson-nano-devkit` | 🟡 recipe-compatible, needs r32 branch + careful sizing (4 GB RAM is tight) |
+| Jetson AGX Thor (Blackwell) | `scarthgap-l4t-r38.x` *(pending upstream)* | `jetson-agx-thor-devkit` | 🔵 drafted on [`jetson-thor`](../../tree/jetson-thor), awaiting external tester |
 
-SD-boot targets are the primary path. `flash.sh` / USB-recovery
-flow is out of scope here — use it for eMMC/NVMe targets if you
-know what you're doing.
+Legend: ✅ maintainer-booted. 🟡 recipe-compatible / untested. 🔵 on a branch pending hardware validation.
+
+**Boot paths differ across the family.** Orin Nano Devkit supports
+SD boot (what the maintainer has tested). AGX Orin / Orin NX / the
+Xavier family / legacy Nano / Thor all need NVIDIA's USB-recovery
+`flash.sh` flow for eMMC or NVMe — out of scope for the quickstart;
+see `FLASH.md` for the per-family notes, and NVIDIA's JetPack
+documentation for the authoritative flashing procedure.
+
+**MACHINE names drift across meta-tegra releases.** Verify against
+the branch you cloned:
+
+```bash
+ls ~/yocto/meta-tegra/conf/machine/ | grep -iE '(orin|xavier|nano|thor)'
+```
 
 #### Other ARM SBCs
 

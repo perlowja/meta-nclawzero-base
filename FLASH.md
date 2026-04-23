@@ -17,7 +17,17 @@ card. Always `diskutil unmountDisk /dev/diskN` before `dd`ing to
 it, and use `/dev/rdiskN` (raw device, much faster) rather than
 `/dev/diskN`.
 
-## Raspberry Pi 4 (64-bit)
+## Raspberry Pi (any 64-bit generation)
+
+The same flash flow works for **Pi 5**, **Pi 4 / CM4**, **Pi 3 64-bit**,
+and **Pi Zero 2 W 64-bit** — just swap the `MACHINE` in the path.
+Substitute `raspberrypi5`, `raspberrypi4-64`, `raspberrypi3-64`, or
+`raspberrypi0-2w-64` for the directory and filename stem. 32-bit
+Pi targets (`raspberrypi4`, `raspberrypi3`, `raspberrypi2`) follow
+the identical `dd` / `bmaptool` procedure with their own MACHINE-stem
+paths.
+
+Examples below use `raspberrypi4-64` (the maintainer-tested target).
 
 ### Fastest path — `bmaptool` (Linux)
 
@@ -105,6 +115,51 @@ The Jetson takes noticeably longer than the Pi to come up on the
 first boot — the initial `systemd-journal-flush` + initial resize
 fills up the rest of the card, typically 60-90 seconds before SSH
 is reachable. Give it time before assuming it's hung.
+
+## Other Jetson family members (USB-recovery / `flash.sh`) — untested
+
+The maintainer has only booted the Orin Nano Devkit (SD-card path).
+The Jetson family members below are recipe-compatible but use
+different flash flows; they need NVIDIA's USB-recovery tooling
+because they boot from eMMC or NVMe, not SD.
+
+| Module | Primary storage | Flash tooling |
+|---|---|---|
+| Jetson Orin NX (8 / 16 GB) | NVMe | JetPack 6 `flash.sh` |
+| Jetson AGX Orin (32 / 64 GB) | eMMC + NVMe | JetPack 6 `flash.sh` |
+| Jetson Xavier NX | eMMC | JetPack 5 `flash.sh` |
+| Jetson AGX Xavier | eMMC | JetPack 5 `flash.sh` |
+| Jetson Nano (legacy 4 GB) | SD or eMMC | JetPack 4 flashing tools |
+| Jetson AGX Thor | NVMe | JetPack 7 `flash.sh` (on the [`jetson-thor`](../../tree/jetson-thor) branch) |
+
+### General shape of the `flash.sh` flow
+
+1. Put the module in recovery mode (force-recovery button / jumper —
+   see the Devkit's guide).
+2. Connect via USB-C (or the Devkit's USB-micro "recovery" port).
+3. Confirm the host sees it: `lsusb | grep -i nvidia` — expect an
+   "NVIDIA Corp." entry in APX mode.
+4. From the Yocto build directory (or NVIDIA's BSP tarball), invoke
+   `flash.sh <MACHINE> mmcblk0p1` (exact syntax depends on JetPack
+   version). meta-tegra integrates this via `bitbake -c do_image_complete` +
+   a generated flashing script per board.
+5. Reboot the target. First boot takes 2–3 minutes while the Jetson
+   expands the partition and runs NVIDIA's OEM-config.
+
+### Authoritative references
+
+Don't follow this section as gospel — for eMMC / NVMe flash the NVIDIA
+Jetson Linux Developer Guide for the specific L4T release is
+authoritative:
+
+- Orin family (L4T r36): https://docs.nvidia.com/jetson/archives/r36.3/DeveloperGuide/
+- Xavier family (L4T r35): https://docs.nvidia.com/jetson/archives/r35.5/DeveloperGuide/
+- Legacy Nano (L4T r32): https://docs.nvidia.com/jetson/l4t/
+- Thor (L4T r38+): check NVIDIA's current JetPack 7 release notes
+
+Open an issue on `github.com/perlowja/meta-nclawzero-base` if you
+validate one of these flows — notes welcome so a future reader has
+real commands instead of shape-of-the-flow prose.
 
 ## After flashing
 
