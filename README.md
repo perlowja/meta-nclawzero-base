@@ -7,6 +7,12 @@ plus optional AI-agent runtime recipes layered on top.
 No pre-built images are distributed from this repository. Everything
 is built locally from upstream source and this layer's recipes.
 
+> **Jetson AGX Thor** (Blackwell, L4T r38.x) is drafted on the
+> [`jetson-thor`](../../tree/jetson-thor) branch — **unvalidated by
+> the maintainer**, awaiting an external tester with Thor hardware.
+> See `JETSON-THOR.md` on that branch for the full caveat and BSP
+> wiring notes.
+
 ## What's in here
 
 ### Base
