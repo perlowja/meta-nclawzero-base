@@ -27,7 +27,9 @@
 #   docker run -d -p 42617:42617 ghcr.io/perlowja/nclawzero-agent
 #
 # Exposes:
-#   42617 — ZeroClaw OpenAI-compatible API (gateway)
+#   42617 — ZeroClaw gateway (webhook + WebSocket; pairing required
+#           by default — read the code from `docker logs` or override
+#           config at /etc/zeroclaw/zeroclaw.toml).
 
 ARG DEBIAN_VERSION=bookworm
 ARG ZEROCLAW_VERSION=0.6.9

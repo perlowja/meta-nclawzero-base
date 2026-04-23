@@ -16,9 +16,17 @@
 
 set -e
 
+# Container bind override. Without --host, zeroclaw's auto-generated
+# config at $HOME/.zeroclaw/config.toml binds to 127.0.0.1, which makes
+# Docker's -p port publish a no-op. 0.0.0.0 makes the gateway actually
+# reachable from outside the container. Override via ZEROCLAW_HOST if
+# you're composing a network namespace where that matters.
+ZC_HOST="${ZEROCLAW_HOST:-0.0.0.0}"
+ZC_PORT="${ZEROCLAW_PORT:-42617}"
+
 case "${1:-agent}" in
   agent)
-    exec /usr/local/bin/zeroclaw daemon
+    exec /usr/local/bin/zeroclaw daemon --host "${ZC_HOST}" --port "${ZC_PORT}"
     ;;
   shell)
     exec /bin/sh

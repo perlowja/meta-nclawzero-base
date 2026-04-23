@@ -26,17 +26,54 @@ Macs, Apple Silicon, Linux x86_64, Raspberry Pi 4/5 64-bit, etc.).
 
 ### `ghcr.io/perlowja/nclawzero-agent`
 
-Headless runtime. Starts ZeroClaw as pid 1, exposes the
-OpenAI-compatible API on port 42617. No UI.
+Headless runtime. ZeroClaw as pid 1, gateway listening on port
+42617. Intended for compose / k8s deployments. No UI.
 
 ```bash
-docker run -d -p 42617:42617 ghcr.io/perlowja/nclawzero-agent
-# Then point any OpenAI-compatible client at http://localhost:42617
+docker run -d --name nclawzero -p 42617:42617 ghcr.io/perlowja/nclawzero-agent
 ```
 
-Same multi-arch coverage. Designed as the canonical base image —
-the demo image is `FROM nclawzero-agent + zterm + an interactive
-entrypoint`, so runtime parity between the two is guaranteed.
+**Bind address**: the entrypoint forces `--host 0.0.0.0` so the
+Docker port publish actually works. Override with
+`-e ZEROCLAW_HOST=127.0.0.1` (or any interface) if you're in a
+network namespace where that matters. Port is overridable with
+`-e ZEROCLAW_PORT=<port>` — keep the `-p` publish in sync.
+
+**Pairing is required by default.** On first start, ZeroClaw emits
+a one-time pairing code on stdout:
+
+```bash
+docker logs nclawzero | grep -A2 'PAIRING REQUIRED'
+#   🔐 PAIRING REQUIRED — use this one-time code:
+#      ┌──────────────┐
+#      │   139177     │
+#      └──────────────┘
+
+PAIR_CODE=139177
+curl -X POST http://localhost:42617/pair -H "X-Pairing-Code: $PAIR_CODE"
+# Response: {"token": "...", "expires_at": ...}
+# Use that token as a bearer for all subsequent /api/* calls.
+```
+
+Or `docker exec nclawzero zeroclaw gateway get-paircode` to retrieve
+without restarting.
+
+**Real API surface** on port 42617 (not OpenAI-compatible — that
+claim has been corrected):
+
+| Path | Purpose |
+|---|---|
+| `POST /pair` | First-time pairing (X-Pairing-Code header) |
+| `POST /webhook` | `{"message": "..."}` turn-completion calls |
+| `GET /ws/chat` | WebSocket streaming chat |
+| `GET /api/*` | REST API (bearer token required) |
+| `GET /health` | Liveness probe |
+| `GET /metrics` | Prometheus metrics |
+
+Same multi-arch coverage as the demo image. Designed as the
+canonical base image — the demo image is `FROM nclawzero-agent +
+zterm + an interactive entrypoint`, so runtime parity between the
+two is guaranteed.
 
 ## Building locally
 
