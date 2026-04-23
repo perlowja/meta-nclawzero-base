@@ -26,7 +26,7 @@ ARG DEBIAN_VERSION=bookworm
 # footprint and guarantees runtime parity between the two.
 ARG NCLAWZERO_AGENT_IMAGE=ghcr.io/perlowja/nclawzero-agent:latest
 ARG ZTERM_VERSION=v0.2.0
-ARG RUST_VERSION=1.86
+ARG RUST_VERSION=1.93
 
 # ──────────────────────────────────────────────────────────────
 # Stage 1 — cargo build zterm from pinned tag
