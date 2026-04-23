@@ -28,7 +28,7 @@ DESCRIPTION = "Rust terminal REPL for zeroclaw / openclaw / nemoclaw. \
 HOMEPAGE = "https://github.com/perlowja/zterm"
 BUGTRACKER = "https://github.com/perlowja/zterm/issues"
 LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 ZTERM_VERSION = "0.2.2"
 
