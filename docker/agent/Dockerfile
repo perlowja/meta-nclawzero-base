@@ -32,7 +32,7 @@
 #           config at /etc/zeroclaw/zeroclaw.toml).
 
 ARG DEBIAN_VERSION=bookworm
-ARG ZEROCLAW_VERSION=0.6.9
+ARG ZEROCLAW_VERSION=0.7.3
 ARG NODEJS_VERSION=22.22.2
 # NemoClaw main branch commit as of 2026-04-23; update by rerunning
 # `gh api repos/NVIDIA/NemoClaw/commits/main --jq .sha` and bumping
@@ -58,10 +58,10 @@ RUN set -eux; \
     case "${TARGETARCH}" in \
       amd64) \
         ZC_TRIPLE=x86_64-unknown-linux-gnu; \
-        ZC_SHA256=8f067e94176c7694d4ef302dded20c87b102fbaddafd75b74a9b307cf849b237 ;; \
+        ZC_SHA256=1036ab4c01b9ed9e397795454c03d376dbb6288ee722eef5d2bc6b807a3b0a01 ;; \
       arm64) \
         ZC_TRIPLE=aarch64-unknown-linux-gnu; \
-        ZC_SHA256=25e5a50a2870cfab14a2767d66650b188ca0ccbb38d9e895dd09b6d7399d73f6 ;; \
+        ZC_SHA256=5dbe0991914fdf29b6f3f29364aad5de20eca4bb92dd9c1491b89aef0676bcf5 ;; \
       *) \
         echo "unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
