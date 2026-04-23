@@ -16,6 +16,7 @@ inherit packagegroup
 RDEPENDS:${PN} = " \
     packagegroup-nclawzero-base \
     zeroclaw-bin \
+    zterm-bin \
     nodejs-bin \
     nemoclaw-firstboot \
 "
