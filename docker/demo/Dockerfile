@@ -31,7 +31,7 @@ ARG RUST_VERSION=1.82
 # ──────────────────────────────────────────────────────────────
 # Stage 1 — cargo build zterm from pinned tag
 # ──────────────────────────────────────────────────────────────
-FROM rust:${RUST_VERSION}-${DEBIAN_VERSION}-slim AS zterm-build
+FROM rust:${RUST_VERSION}-slim-${DEBIAN_VERSION} AS zterm-build
 ARG ZTERM_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
