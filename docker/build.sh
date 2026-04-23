@@ -30,8 +30,10 @@ BUILDER_NAME="nclawzero-builder"
 while [ $# -gt 0 ]; do
   case "$1" in
     --tag) TAG="$2"; shift 2 ;;
+    --tag=*) TAG="${1#*=}"; shift ;;
     --no-push) PUSH=false; shift ;;
     --platforms) PLATFORMS="$2"; shift 2 ;;
+    --platforms=*) PLATFORMS="${1#*=}"; shift ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^#\s\{0,1\}//'
       exit 0
