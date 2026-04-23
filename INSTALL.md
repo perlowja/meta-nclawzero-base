@@ -95,7 +95,60 @@ For Jetson targets also append `${TOPDIR}/../meta-tegra`.
 
 ### `conf/local.conf`
 
-For **Raspberry Pi 4** (64-bit):
+#### Supported machines
+
+All recipes in this layer are ARM-universal (`COMPATIBLE_HOST =
+"(aarch64|arm).*-linux"`) — they compile for any ARM target the
+BSP layer supports. The matrix below summarizes the known-good
+`MACHINE` values by family.
+
+**Raspberry Pi** (via `meta-raspberrypi` scarthgap):
+
+| MACHINE | Hardware | Status |
+|---|---|---|
+| `raspberrypi4-64` | Pi 4 / CM4, 64-bit | ✅ maintainer-tested (Pi 4 2 GB + 8 GB) |
+| `raspberrypi5` | Pi 5 | 🟡 recipe-compatible, maintainer has not booted |
+| `raspberrypi3-64` | Pi 3 B/B+, 64-bit | 🟡 recipe-compatible, untested |
+| `raspberrypi0-2w-64` | Pi Zero 2 W, 64-bit | 🟡 recipe-compatible, untested — may run out of RAM during agent startup (512 MB) |
+| `raspberrypi4` | Pi 4, 32-bit | 🟡 recipe-compatible, not recommended (agent stack benefits from 64-bit) |
+| `raspberrypi3` | Pi 3, 32-bit | 🟡 recipe-compatible, not recommended |
+| Pi 1 / Pi 2 / Pi Zero (original) | ARMv6 / older ARMv7 | ❌ out of scope — too underpowered for the agent runtime |
+
+**NVIDIA Jetson** (via `meta-tegra`, branch tracks the L4T release):
+
+| MACHINE | Hardware | meta-tegra branch | Status |
+|---|---|---|---|
+| `jetson-orin-nano-devkit` | Jetson Orin Nano 8 GB Devkit | `scarthgap-l4t-r36.3.0` | ✅ maintainer-tested |
+| `jetson-orin-nx-devkit` | Jetson Orin NX 8 / 16 GB | `scarthgap-l4t-r36.3.0` | 🟡 recipe-compatible, untested |
+| `jetson-agx-orin-devkit` | Jetson AGX Orin 32 / 64 GB | `scarthgap-l4t-r36.3.0` | 🟡 recipe-compatible, untested |
+| `jetson-xavier-nx-devkit` | Jetson Xavier NX | `scarthgap-l4t-r35.x.x` | 🟡 recipe-compatible, needs r35 branch |
+| `jetson-agx-xavier-devkit` | Jetson AGX Xavier | `scarthgap-l4t-r35.x.x` | 🟡 recipe-compatible, needs r35 branch |
+| `jetson-nano-devkit` | Jetson Nano (legacy 4 GB) | `scarthgap-l4t-r32.x.x` | 🟡 recipe-compatible, needs r32 branch + careful sizing (4 GB RAM is tight) |
+| `jetson-agx-thor-devkit` | Jetson AGX Thor (Blackwell) | `scarthgap-l4t-r38.x` *(pending upstream)* | 🔵 drafted on [`jetson-thor`](../../tree/jetson-thor) branch, awaiting external tester — see `JETSON-THOR.md` |
+
+Legend: ✅ = maintainer-booted and validated. 🟡 = architecture-clean, should build, not tested by the maintainer. 🔵 = drafted on a separate branch pending hardware validation.
+
+**Important:** `MACHINE` names have been stable in recent meta-tegra
+releases but are not guaranteed. Always verify against the branch
+you cloned:
+
+```bash
+ls ~/yocto/meta-tegra/conf/machine/ | grep -iE '(orin|xavier|nano|thor)'
+```
+
+Same check for Pi:
+
+```bash
+ls ~/yocto/meta-raspberrypi/conf/machine/
+```
+
+If a name below doesn't exist in your BSP checkout, the BSP has
+renamed or dropped it — the layer has nothing to do with that.
+
+#### Raspberry Pi — canonical `local.conf`
+
+Template (swap `MACHINE` for your Pi generation from the table
+above):
 
 ```bitbake
 MACHINE ?= "raspberrypi4-64"
@@ -108,7 +161,10 @@ EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
 IMAGE_FSTYPES += "wic wic.gz wic.bmap"
 ```
 
-For **Jetson Orin Nano** (SD-boot flow):
+#### Jetson — canonical `local.conf`
+
+Template (swap `MACHINE` and make sure `meta-tegra` is on the
+matching L4T branch):
 
 ```bitbake
 MACHINE ?= "jetson-orin-nano-devkit"
@@ -116,9 +172,15 @@ DISTRO ?= "poky"
 IMAGE_FSTYPES += "wic wic.xz"
 
 # meta-tegra version pin must match the branch you cloned.
-# e.g. for scarthgap-l4t-r36.3.0:
+# e.g. for scarthgap-l4t-r36.3.0 (Orin family):
 PREFERRED_PROVIDER_virtual/bootloader = "tegra-bootloader"
 ```
+
+For Xavier (`scarthgap-l4t-r35.x.x`) and legacy Nano
+(`scarthgap-l4t-r32.x.x`) the `PREFERRED_PROVIDER` line is the same;
+what changes is which branch you cloned for meta-tegra and which
+JetPack version NVIDIA's flash tooling targets. Expect bbappends to
+land for each branch as those flows get validated.
 
 ## Build
 
@@ -137,16 +199,30 @@ bitbake nclawzero-agent-image
 
 ## Where the output lands
 
+Path pattern: `build/tmp/deploy/images/${MACHINE}/nclawzero-*-image-${MACHINE}.wic.<ext>`.
+
+Concrete examples:
+
 ```
 build/tmp/deploy/images/raspberrypi4-64/
   nclawzero-base-image-raspberrypi4-64.wic.gz
   nclawzero-base-image-raspberrypi4-64.wic.bmap
 
+build/tmp/deploy/images/raspberrypi5/
+  nclawzero-base-image-raspberrypi5.wic.gz
+  nclawzero-base-image-raspberrypi5.wic.bmap
+
 build/tmp/deploy/images/jetson-orin-nano-devkit/
   nclawzero-base-image-jetson-orin-nano-devkit.wic.xz
+
+build/tmp/deploy/images/jetson-agx-orin-devkit/
+  nclawzero-base-image-jetson-agx-orin-devkit.wic.xz
 ```
 
-See **`FLASH.md`** for writing these images to SD cards.
+Pi output is wic.gz + bmap (bmaptool-friendly). Jetson output is
+wic.xz consumed by NVIDIA's `flash.sh`. See **`FLASH.md`** for
+writing these images — SD card on Pi + Orin Nano, USB-recovery on
+AGX / NX / Xavier / Thor.
 
 ## Troubleshooting
 

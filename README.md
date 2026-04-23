@@ -1,8 +1,15 @@
 # meta-nclawzero-base
 
 Yocto layer for building minimal Linux images for edge single-board
-computers — **Raspberry Pi 4** and **NVIDIA Jetson Orin Nano** —
+computers — the **Raspberry Pi** and **NVIDIA Jetson** families,
 plus optional AI-agent runtime recipes layered on top.
+
+All recipes are ARM-universal (`COMPATIBLE_HOST = "(aarch64|arm).*-linux"`).
+The maintainer has booted Pi 4 (2 GB + 8 GB) and Jetson Orin Nano
+(8 GB Devkit); other family members (Pi 5, Pi 3 64-bit, Pi Zero 2 W,
+Jetson Orin NX, AGX Orin, Xavier NX / AGX, legacy Nano, Thor) are
+recipe-compatible but untested. See `INSTALL.md` for the full
+`MACHINE` value matrix with tested/untested flags.
 
 No pre-built images are distributed from this repository. Everything
 is built locally from upstream source and this layer's recipes.
