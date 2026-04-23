@@ -34,28 +34,96 @@ Debian/Ubuntu container with `--privileged`, or a cloud instance.
 
 ### Target hardware (what you flash the image onto)
 
-#### Raspberry Pi 4 Model B
+This layer is architecture-aware and BSP-agnostic — the base image
+builds for any `MACHINE` a Yocto BSP layer supports, and the agent
+image builds wherever ZeroClaw and Node.js ship prebuilt binaries
+(aarch64 / armv7 / armv6 via bbappend / x86_64). See the coverage
+matrix below for specifics.
+
+#### Raspberry Pi family
+
+| Model | Arch | MACHINE (meta-raspberrypi) | `base` | `desktop` | `agent` |
+|---|---|---|---|---|---|
+| Pi 5 / Pi 500 | aarch64 | `raspberrypi5` | ✅ | ✅ | ✅ |
+| Pi 4 / 400 / CM4 | aarch64 | `raspberrypi4-64` | ✅ | ✅ (4 GB+) | ✅ (4 GB+) |
+| Pi 3 B+ / A+ | aarch64 | `raspberrypi3-64` | ✅ | ⚠️ tight | ⚠️ tight (1 GB) |
+| Pi Zero 2 W | aarch64 | `raspberrypi0-2w-64` | ✅ | ❌ (512 MB) | ❌ (512 MB) |
+| Pi 4 / CM4 in 32-bit | armv7 | `raspberrypi4` | ✅ | ✅ (4 GB+) | ✅ (4 GB+) |
+| Pi 3 B+ / A+ in 32-bit | armv7 | `raspberrypi3` | ✅ | ⚠️ | ⚠️ |
+| Pi 2 Model B | armv7 | `raspberrypi2` | ✅ | ❌ | ⚠️ (1 GB) |
+| Pi 1 / Pi Zero / Pi Zero W / CM1 | armv6 | `raspberrypi` / `raspberrypi0-wifi` | ✅ | ❌ | ⚠️ see note |
+
+**Pi Zero / Pi 1 (ARMv6) note**: the agent image needs a bbappend
+for `zeroclaw-bin` to pick the `arm-unknown-linux-gnueabihf`
+(ARMv6+) release tarball, and Node.js has no official armv6 prebuilt
+— so `nemoclaw-firstboot` can't complete on those boards today. Use
+`base` for Pi Zero / Pi 1.
+
+Flashing, power, and SD-card requirements (the physical side of
+the story):
 
 | | |
 |---|---|
-| Board | Raspberry Pi 4 Model B |
-| RAM | 2 GB for `base`, 4 GB+ recommended for `desktop` or `agent`, 8 GB for everything |
-| SD card | 8 GB minimum (Class 10 / UHS-1) — 16 GB or larger preferred for agent image |
-| Power | Official 5V 3A USB-C PSU — underpowered supplies will throttle boot |
-| Other | Ethernet cable (first-boot provisioning needs network if using agent-image) |
+| SD card | 8 GB minimum for `base`, 16 GB recommended for `agent` (Class 10 / UHS-1 or faster) |
+| Power | Pi 4 / Pi 5 need an official 5V/3A PSU; underpowered supplies throttle boot silently |
+| First boot | `agent` image needs outbound HTTPS to `github.com` for NemoClaw provisioning (Ethernet DHCP just works) |
 
-The Compute Module 4 (eMMC or SD) works with the same recipes but
-isn't regularly smoke-tested in this layer.
+#### NVIDIA Jetson
 
-#### Jetson Orin Nano Developer Kit
+| Module | Arch | MACHINE (meta-tegra) | `base` | `desktop` | `agent` |
+|---|---|---|---|---|---|
+| Jetson Orin Nano 8GB Dev Kit | aarch64 | `jetson-orin-nano-devkit` | ✅ | ✅ | ✅ |
+| Jetson Orin NX / AGX Orin | aarch64 | (per board) | ✅ | ✅ | ✅ |
 
-| | |
-|---|---|
-| Board | Jetson Orin Nano 8GB Developer Kit |
-| RAM | 8 GB (fixed, not user-upgradable) |
-| SD card | 16 GB minimum (Class 10) — 64 GB recommended so the rootfs has room to grow |
-| Power | 19V barrel adapter (not USB-C) |
-| Boot mode | SD boot enabled in UEFI (this layer targets the simple SD-boot flow, not `flash.sh` / USB recovery) |
+SD-boot targets are the primary path. `flash.sh` / USB-recovery
+flow is out of scope here — use it for eMMC/NVMe targets if you
+know what you're doing.
+
+#### Other ARM SBCs
+
+Anything with a Yocto BSP layer and a 64-bit or hard-float 32-bit
+Cortex-A core should work end-to-end. Add the BSP layer to
+`bblayers.conf`, set the right `MACHINE`, and build — no recipe
+changes required.
+
+| Family | BSP layer | Example boards |
+|---|---|---|
+| Rockchip | `meta-rockchip` | Radxa Rock 5 / 4 / 3, OrangePi 5, Pine RockPro64 |
+| Allwinner | `meta-sunxi` | OrangePi H-series / R-series, Cubieboard, BananaPi M1/M2 |
+| NXP i.MX | `meta-freescale` + `meta-freescale-3rdparty` | Toradex Verdin, Phytec phyBOARD, Kobol Helios64 |
+| Amlogic | `meta-meson` | ODROID-C2 / C4 / N2, Khadas VIM |
+| Mediatek | `meta-mediatek` | Genio 350/500/700 dev kits |
+| Xilinx Zynq | `meta-xilinx` | ZCU102, Kria KV260, Ultra96 |
+| TI | `meta-ti` | BeagleBone AI-64, BeaglePlay |
+| Samsung Exynos | `meta-samsung` | ODROID-XU4 (with caveats on kernel support) |
+
+#### x86 / x86_64 SBCs and mini-PCs
+
+| Target | BSP layer | MACHINE | Notes |
+|---|---|---|---|
+| Intel NUC, any x86_64 PC | `meta-intel` | `intel-corei7-64` | Full coverage of all three image variants |
+| UP Board, UP² | `meta-intel` + `meta-aaeon-bsp` | `up-*` | Same |
+| LattePanda 3 Delta | `meta-intel` | `intel-corei7-64` | Same |
+| Generic qemu x86-64 | poky default | `qemux86-64` | Useful for build validation without hardware |
+
+#### RISC-V
+
+The base image builds for any RISC-V 64-bit board via
+`meta-riscv`. The **agent image does not** — upstream ZeroClaw and
+Node.js don't ship prebuilt `riscv64` binaries today. A source
+recipe would be needed (ZeroClaw via `rust-bin`-style build,
+Node.js via the upstream `meta-nodejs` source recipe).
+
+| Board | BSP layer | MACHINE | `base` | `desktop` | `agent` |
+|---|---|---|---|---|---|
+| StarFive VisionFive 2 | `meta-riscv` | `visionfive2` | ✅ | ⚠️ kernel dep | ❌ |
+| LicheePi 4A | `meta-riscv` | `licheepi4a` | ✅ | ⚠️ | ❌ |
+| BeagleV-Ahead | `meta-riscv` | `beaglev-ahead` | ✅ | ⚠️ | ❌ |
+| SiFive HiFive Unmatched | `meta-riscv` | `unmatched` | ✅ | ❌ (no GPU) | ❌ |
+
+If you need the agent stack on RISC-V, open an issue — the fix is
+a small nodejs-source recipe plus a ZeroClaw bbappend that builds
+from the upstream crate instead of pulling a prebuilt release.
 
 ### Network (first-boot only, agent-image only)
 
