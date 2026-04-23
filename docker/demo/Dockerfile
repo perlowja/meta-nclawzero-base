@@ -35,7 +35,7 @@ FROM rust:${RUST_VERSION}-slim-${DEBIAN_VERSION} AS zterm-build
 ARG ZTERM_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git ca-certificates pkg-config \
+        git ca-certificates pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
