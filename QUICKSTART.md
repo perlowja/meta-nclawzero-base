@@ -34,11 +34,16 @@ Debian/Ubuntu container with `--privileged`, or a cloud instance.
 
 ### Target hardware (what you flash the image onto)
 
-This layer is architecture-aware and BSP-agnostic — the base image
-builds for any `MACHINE` a Yocto BSP layer supports, and the agent
-image builds wherever ZeroClaw and Node.js ship prebuilt binaries
-(aarch64 / armv7 / armv6 via bbappend / x86_64). See the coverage
-matrix below for specifics.
+This layer targets **ARM edge single-board computers**. It's
+BSP-agnostic within ARM — the base image builds for any `MACHINE`
+a Yocto BSP layer supports, and the agent image builds wherever
+ZeroClaw and Node.js ship prebuilt binaries (aarch64 + armv7; ARMv6
+needs a small bbappend).
+
+Non-ARM targets (x86_64, RISC-V) aren't in scope. If you need
+them, both recipes are small enough to copy and widen in your own
+layer — and upstream ZeroClaw + Node.js do ship `x86_64-linux`
+binaries, so a downstream bbappend is one override away.
 
 #### Raspberry Pi family
 

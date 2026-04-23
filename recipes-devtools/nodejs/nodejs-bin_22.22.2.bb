@@ -4,10 +4,11 @@
 # Node.js 22 LTS — pre-built binary, per-architecture selection.
 # NemoClaw requires node >= 22.16.0.
 #
-# Upstream nodejs.org ships prebuilt Linux archives for arm64,
-# armv7l, and x64. ARMv6 (Pi Zero / Pi 1) has no official prebuilt
-# — if you need Node there, use nodejs-source or run the agent on
-# a newer board. RISC-V has no official prebuilt either.
+# This layer targets ARM edge SBCs. Upstream nodejs.org ships
+# prebuilt Linux archives for arm64 and armv7l — both picked up
+# automatically here. ARMv6 (Pi Zero / Pi 1) and RISC-V have no
+# official prebuilt; agent image is not supported on those
+# platforms today. x86_64 is out of scope for this layer.
 
 SUMMARY = "Node.js 22 LTS JavaScript runtime (pre-built binary)"
 HOMEPAGE = "https://nodejs.org"
@@ -18,7 +19,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 NODEJS_ARCH ?= "INVALID-override-for-this-TARGET_ARCH"
 NODEJS_ARCH:aarch64 = "arm64"
 NODEJS_ARCH:arm = "armv7l"
-NODEJS_ARCH:x86_64 = "x64"
 
 SRC_URI = "https://nodejs.org/dist/v${PV}/node-v${PV}-linux-${NODEJS_ARCH}.tar.xz;name=node"
 
@@ -27,11 +27,10 @@ SRC_URI = "https://nodejs.org/dist/v${PV}/node-v${PV}-linux-${NODEJS_ARCH}.tar.x
 SRC_URI[node.sha256sum] = "INVALID-override-for-this-TARGET_ARCH"
 SRC_URI[node.sha256sum]:aarch64 = "e9e1930fd321a470e29bb68f30318bf58e3ecb4acb4f1533fb19c58328a091fe"
 SRC_URI[node.sha256sum]:arm = "2ebc6746e517f345da340ec76a108203eb6c2365391eb525c0e0dd6135b0b9df"
-SRC_URI[node.sha256sum]:x86_64 = "88fd1ce767091fd8d4a99fdb2356e98c819f93f3b1f8663853a2dee9b438068a"
 
 S = "${WORKDIR}/node-v${PV}-linux-${NODEJS_ARCH}"
 
-COMPATIBLE_HOST = "(aarch64|arm|x86_64).*-linux"
+COMPATIBLE_HOST = "(aarch64|arm).*-linux"
 
 do_install() {
     install -d ${D}${prefix}
