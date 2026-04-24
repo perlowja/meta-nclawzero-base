@@ -24,7 +24,7 @@ HOMEPAGE = "https://github.com/zeroclaw-labs/zeroclaw"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-ZEROCLAW_VERSION = "0.6.9"
+ZEROCLAW_VERSION = "0.7.3"
 
 # Per-arch binary tuple. Override in a bbappend for Pi Zero / Pi 1.
 ZEROCLAW_TRIPLE ?= "INVALID-override-for-this-TARGET_ARCH"
@@ -41,17 +41,23 @@ SRC_URI = " \
 # BitBake varflag syntax (SRC_URI[bin.sha256sum]) does not accept
 # :override suffixes. Override ZEROCLAW_SHA; the assignment below
 # propagates the arch-correct value to the varflag.
+# Verified against upstream SHA256SUMS at
+# https://github.com/zeroclaw-labs/zeroclaw/releases/download/v0.7.3/SHA256SUMS
 ZEROCLAW_SHA ?= "INVALID-override-for-this-TARGET_ARCH"
-ZEROCLAW_SHA:aarch64 = "25e5a50a2870cfab14a2767d66650b188ca0ccbb38d9e895dd09b6d7399d73f6"
-ZEROCLAW_SHA:arm = "8555973fd8a5023647738264fee25092b3f06fdfe6eb193fad230d8deea973b7"
+ZEROCLAW_SHA:aarch64 = "5dbe0991914fdf29b6f3f29364aad5de20eca4bb92dd9c1491b89aef0676bcf5"
+ZEROCLAW_SHA:arm = "788351f8e42bf0b3d79c8a5d3d87cf5b8ff37cbed0bc6ce9cd22ba1df8c61fe8"
 SRC_URI[bin.sha256sum] = "${ZEROCLAW_SHA}"
 
 COMPATIBLE_HOST = "(aarch64|arm).*-linux"
 
-inherit systemd
+inherit systemd useradd
 
-SYSTEMD_SERVICE:${PN} = "zeroclaw.service"
-SYSTEMD_AUTO_ENABLE = "enable"
+# Create the `zeroclaw` system user/group referenced by the bundled
+# zeroclaw.service (User=zeroclaw, Group=zeroclaw). Without this,
+# systemd fails the service with status=217/USER on first boot.
+# HOME points at /var/lib/zeroclaw — the daemon's state dir.
+USERADD_PACKAGES = "${PN}"
+USERADD_PARAM:${PN} = "--system --home-dir /var/lib/zeroclaw --no-create-home --shell /sbin/nologin --user-group zeroclaw"
 
 do_install() {
     # Binary
@@ -60,16 +66,24 @@ do_install() {
 
     # Configuration
     install -d ${D}${sysconfdir}/zeroclaw
-    install -m 0600 ${WORKDIR}/zeroclaw.toml ${D}${sysconfdir}/zeroclaw/
+    install -m 0640 ${WORKDIR}/zeroclaw.toml ${D}${sysconfdir}/zeroclaw/
 
-    # Data directories
-    install -d ${D}/var/lib/zeroclaw
-    install -d ${D}/var/lib/zeroclaw/skills
-    install -d ${D}/var/lib/zeroclaw/workspace
+    # Data directories — owned by the zeroclaw user so the daemon
+    # can write session/state files without chown on first run.
+    install -d -o zeroclaw -g zeroclaw ${D}/var/lib/zeroclaw
+    install -d -o zeroclaw -g zeroclaw ${D}/var/lib/zeroclaw/skills
+    install -d -o zeroclaw -g zeroclaw ${D}/var/lib/zeroclaw/workspace
 
     # Systemd service
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/zeroclaw.service ${D}${systemd_system_unitdir}/
+}
+
+# Configuration file is readable by the zeroclaw group for the
+# daemon to pick up provider/API keys. Not world-readable (contains
+# encrypted key material).
+pkg_postinst:${PN}() {
+    chgrp zeroclaw $D${sysconfdir}/zeroclaw/zeroclaw.toml || true
 }
 
 FILES:${PN} = " \
