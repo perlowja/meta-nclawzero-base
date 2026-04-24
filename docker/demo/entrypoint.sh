@@ -35,9 +35,11 @@ mkdir -p /var/lib/zeroclaw/logs
 ZEROCLAW_PID=$!
 
 # Wait up to 30s for the health endpoint to respond.
+# curl is preferred over wget — wget isn't in the debian-slim base, curl is
+# added in the agent Dockerfile's final-stage apt install.
 i=0
 while [ $i -lt 30 ]; do
-  if wget -q -O - "${ZEROCLAW_URL}" >/dev/null 2>&1; then
+  if curl -fsS "${ZEROCLAW_URL}" >/dev/null 2>&1; then
     break
   fi
   sleep 1
