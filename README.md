@@ -1,15 +1,19 @@
 # meta-nclawzero-base
 
 Yocto layer for building minimal Linux images for edge single-board
-computers — the **Raspberry Pi** and **NVIDIA Jetson** families,
-plus optional AI-agent runtime recipes layered on top.
+computers — the **Raspberry Pi** family, plus optional AI-agent
+runtime recipes layered on top.
 
 All recipes are ARM-universal (`COMPATIBLE_HOST = "(aarch64|arm).*-linux"`).
-The maintainer has booted Pi 4 (2 GB + 8 GB) and Jetson Orin Nano
-(8 GB Devkit); other family members (Pi 5, Pi 3 64-bit, Pi Zero 2 W,
-Jetson Orin NX, AGX Orin, Xavier NX / AGX, legacy Nano, Thor) are
-recipe-compatible but untested. See `INSTALL.md` for the full
-`MACHINE` value matrix with tested/untested flags.
+The maintainer has booted Pi 4 (2 GB + 8 GB); other family members
+(Pi 5, Pi 3 64-bit, Pi Zero 2 W) are recipe-compatible but untested.
+See `INSTALL.md` for the full `MACHINE` value matrix with
+tested/untested flags.
+
+> **Note:** Jetson family support is on the
+> `wip/jetson-pending-validation` branch (not pushed publicly)
+> pending end-to-end hardware validation on a known-good dev kit.
+> The `main` branch is Raspberry-Pi-only until that lands.
 
 No pre-built images are distributed from this repository. Everything
 is built locally from upstream source and this layer's recipes.
@@ -74,10 +78,6 @@ All fetches happen at build time from public upstream sources.
 - `meta-openembedded/meta-oe`, `meta-openembedded/meta-python`,
   `meta-openembedded/meta-networking`
 - `meta-raspberrypi` (for Pi targets)
-- `meta-tegra` (for Jetson targets, **upstream OE4T fork** —
-  `github.com/OE4T/meta-tegra`). See `INSTALL.md` for the Jetson
-  BSP setup notes, including the GCC14/glibc2.41 bbappend that you
-  may need on recent build hosts.
 
 ## Getting started
 
@@ -86,9 +86,9 @@ All fetches happen at build time from public upstream sources.
   upstream Yocto Project documentation. Start here if you've
   never used Yocto before.
 - **`INSTALL.md`** — full build-host setup, `bblayers.conf` /
-  `local.conf` templates, Jetson GCC14/glibc bbappend guidance.
-- **`FLASH.md`** — writing images to SD cards on Raspberry Pi and
-  Jetson Orin Nano (`bmaptool`, `dd`, macOS-specific notes).
+  `local.conf` templates.
+- **`FLASH.md`** — writing images to SD cards on Raspberry Pi
+  (`bmaptool`, `dd`, macOS-specific notes).
 - **`docker/README.md`** — Docker deliverables: `nclawzero-demo`
   (one-command interactive bench with zterm TUI + live agent) and
   `nclawzero-agent` (headless runtime for compose/k8s). Published

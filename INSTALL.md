@@ -39,29 +39,9 @@ git clone -b scarthgap https://git.yoctoproject.org/git/meta-raspberrypi
 git clone https://github.com/perlowja/meta-nclawzero-base.git
 ```
 
-For Jetson builds, also:
-
-```bash
-git clone -b scarthgap-l4t-r36.3.0 https://github.com/OE4T/meta-tegra.git
-```
-
-### Jetson build-host caveat (GCC14 / glibc ≥ 2.41)
-
-On recent Debian/Ubuntu hosts where the native toolchain is GCC 14
-against glibc ≥ 2.41, four recipes in `meta-tegra` fail to compile
-the BaseTools with `error: function declaration isn't a prototype`.
-Both `-Wno-error=strict-prototypes` AND `-std=gnu17` are required —
-either alone fails the other. Add a local bbappend:
-
-```bash
-mkdir -p ~/yocto/meta-local/recipes-bsp/edk2/
-cat > ~/yocto/meta-local/recipes-bsp/edk2/edk2-firmware-tegra_%.bbappend <<'EOF'
-BUILD_CFLAGS:append = " -Wno-error=strict-prototypes -std=gnu17"
-EOF
-```
-
-Apply the same bbappend to `edk2-basetools-tegra-native`,
-`edk2-firmware-tegra-minimal`, and `standalone-mm-optee-tegra`.
+> **Note:** Jetson family BSP integration (via `meta-tegra`) is on
+> the `wip/jetson-pending-validation` branch pending hardware
+> validation. `main` is Raspberry-Pi-only.
 
 ## Initialize the build
 
@@ -91,8 +71,6 @@ BBLAYERS ?= " \
 "
 ```
 
-For Jetson targets also append `${TOPDIR}/../meta-tegra`.
-
 ### `conf/local.conf`
 
 #### Supported machines
@@ -114,29 +92,9 @@ BSP layer supports. The matrix below summarizes the known-good
 | `raspberrypi3` | Pi 3, 32-bit | 🟡 recipe-compatible, not recommended |
 | Pi 1 / Pi 2 / Pi Zero (original) | ARMv6 / older ARMv7 | ❌ out of scope — too underpowered for the agent runtime |
 
-**NVIDIA Jetson** (via `meta-tegra`, branch tracks the L4T release):
+Legend: ✅ = maintainer-booted and validated. 🟡 = architecture-clean, should build, not tested by the maintainer.
 
-| MACHINE | Hardware | meta-tegra branch | Status |
-|---|---|---|---|
-| `jetson-orin-nano-devkit` | Jetson Orin Nano 8 GB Devkit | `scarthgap-l4t-r36.3.0` | ✅ maintainer-tested |
-| `jetson-orin-nx-devkit` | Jetson Orin NX 8 / 16 GB | `scarthgap-l4t-r36.3.0` | 🟡 recipe-compatible, untested |
-| `jetson-agx-orin-devkit` | Jetson AGX Orin 32 / 64 GB | `scarthgap-l4t-r36.3.0` | 🟡 recipe-compatible, untested |
-| `jetson-xavier-nx-devkit` | Jetson Xavier NX | `scarthgap-l4t-r35.x.x` | 🟡 recipe-compatible, needs r35 branch |
-| `jetson-agx-xavier-devkit` | Jetson AGX Xavier | `scarthgap-l4t-r35.x.x` | 🟡 recipe-compatible, needs r35 branch |
-| `jetson-nano-devkit` | Jetson Nano (legacy 4 GB) | `scarthgap-l4t-r32.x.x` | 🟡 recipe-compatible, needs r32 branch + careful sizing (4 GB RAM is tight) |
-| `jetson-agx-thor-devkit` | Jetson AGX Thor (Blackwell) | `scarthgap-l4t-r38.x` *(pending upstream)* | 🔵 drafted on [`jetson-thor`](../../tree/jetson-thor) branch, awaiting external tester — see `JETSON-THOR.md` |
-
-Legend: ✅ = maintainer-booted and validated. 🟡 = architecture-clean, should build, not tested by the maintainer. 🔵 = drafted on a separate branch pending hardware validation.
-
-**Important:** `MACHINE` names have been stable in recent meta-tegra
-releases but are not guaranteed. Always verify against the branch
-you cloned:
-
-```bash
-ls ~/yocto/meta-tegra/conf/machine/ | grep -iE '(orin|xavier|nano|thor)'
-```
-
-Same check for Pi:
+Verify the MACHINE you want exists in the BSP checkout:
 
 ```bash
 ls ~/yocto/meta-raspberrypi/conf/machine/
@@ -160,27 +118,6 @@ EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
 # Emit .wic.gz for bmaptool flashing
 IMAGE_FSTYPES += "wic wic.gz wic.bmap"
 ```
-
-#### Jetson — canonical `local.conf`
-
-Template (swap `MACHINE` and make sure `meta-tegra` is on the
-matching L4T branch):
-
-```bitbake
-MACHINE ?= "jetson-orin-nano-devkit"
-DISTRO ?= "poky"
-IMAGE_FSTYPES += "wic wic.xz"
-
-# meta-tegra version pin must match the branch you cloned.
-# e.g. for scarthgap-l4t-r36.3.0 (Orin family):
-PREFERRED_PROVIDER_virtual/bootloader = "tegra-bootloader"
-```
-
-For Xavier (`scarthgap-l4t-r35.x.x`) and legacy Nano
-(`scarthgap-l4t-r32.x.x`) the `PREFERRED_PROVIDER` line is the same;
-what changes is which branch you cloned for meta-tegra and which
-JetPack version NVIDIA's flash tooling targets. Expect bbappends to
-land for each branch as those flows get validated.
 
 ## Build
 
@@ -211,18 +148,10 @@ build/tmp/deploy/images/raspberrypi4-64/
 build/tmp/deploy/images/raspberrypi5/
   nclawzero-base-image-raspberrypi5.wic.gz
   nclawzero-base-image-raspberrypi5.wic.bmap
-
-build/tmp/deploy/images/jetson-orin-nano-devkit/
-  nclawzero-base-image-jetson-orin-nano-devkit.wic.xz
-
-build/tmp/deploy/images/jetson-agx-orin-devkit/
-  nclawzero-base-image-jetson-agx-orin-devkit.wic.xz
 ```
 
-Pi output is wic.gz + bmap (bmaptool-friendly). Jetson output is
-wic.xz consumed by NVIDIA's `flash.sh`. See **`FLASH.md`** for
-writing these images — SD card on Pi + Orin Nano, USB-recovery on
-AGX / NX / Xavier / Thor.
+Pi output is wic.gz + bmap (bmaptool-friendly). See **`FLASH.md`**
+for writing these images to SD card.
 
 ## Troubleshooting
 
@@ -230,8 +159,6 @@ AGX / NX / Xavier / Thor.
   a host with AppArmor in enforce mode. The `base-passwd_%.bbappend`
   in this layer should handle it; verify the bbappend is being
   picked up via `bitbake -e base-passwd | grep -i bbappend`.
-- **Jetson BaseTools fails with `error: function declaration isn't
-  a prototype`**: add the GCC14/glibc bbappend described above.
 - **NemoClaw first-boot provisioning fails on-device**: the device
   needs outbound HTTPS to `github.com`. Check `journalctl -u
   nemoclaw-firstboot` on the target.

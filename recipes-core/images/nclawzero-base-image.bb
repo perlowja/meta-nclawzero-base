@@ -11,17 +11,12 @@
 #
 # Targets:
 #   - raspberrypi4-64 (Pi 4 Model B, 2GB / 4GB / 8GB)
-#   - jetson-orin-nano-devkit (via meta-tegra; SD-boot flow)
 #
 # Flash (Raspberry Pi):
 #   bmaptool copy tmp/deploy/images/raspberrypi4-64/nclawzero-base-image-raspberrypi4-64.wic.gz /dev/sdX
-#
-# Flash (Jetson Orin Nano SD):
-#   xz -d tmp/deploy/images/jetson-orin-nano-devkit/nclawzero-base-image-*.wic.xz
-#   dd if=...wic of=/dev/sdX bs=4M status=progress conv=fsync
 
 SUMMARY = "nclawzero — minimal Linux + goodies for edge SBCs (headless)"
-DESCRIPTION = "Headless console image for Raspberry Pi and Jetson: \
+DESCRIPTION = "Headless console image for Raspberry Pi: \
     systemd + SSH + networking + shell/dev tools. No GUI, no AI agent. \
     Layer packagegroup-nclawzero-agent or -desktop on top if wanted."
 LICENSE = "Apache-2.0"

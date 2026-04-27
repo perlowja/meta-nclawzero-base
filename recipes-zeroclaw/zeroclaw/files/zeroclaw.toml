@@ -1,5 +1,5 @@
 # ZeroClaw configuration for nclawzero embedded image
-# Optimized for low-memory ARM targets (Raspberry Pi 4, Jetson)
+# Optimized for low-memory ARM targets (Raspberry Pi 4)
 
 [gateway]
 host = "[::]"

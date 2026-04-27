@@ -12,9 +12,8 @@
 #   - No Node.js
 #   - No first-boot provisioner (no outbound HTTPS required at boot)
 #
-# Primary target: Raspberry Pi 4 2 GB / Pi Zero 2 W / Jetson Orin
-# Nano on a modest SD card. Also works on any machine the agent
-# image supports.
+# Primary target: Raspberry Pi 4 2 GB / Pi Zero 2 W on a modest
+# SD card. Also works on any machine the agent image supports.
 #
 # Users who later want the full agent stack can either reflash with
 # `nclawzero-agent-image` or runtime-install NemoClaw themselves.

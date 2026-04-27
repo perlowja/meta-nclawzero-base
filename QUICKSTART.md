@@ -75,31 +75,9 @@ the story):
 
 #### NVIDIA Jetson
 
-| Module | meta-tegra branch | MACHINE | Status |
-|---|---|---|---|
-| Jetson Orin Nano 8 GB Devkit | `scarthgap-l4t-r36.3.0` | `jetson-orin-nano-devkit` | ✅ maintainer-tested (SD boot) |
-| Jetson Orin NX 8 / 16 GB | `scarthgap-l4t-r36.3.0` | `jetson-orin-nx-devkit` | 🟡 recipe-compatible, untested (eMMC / NVMe via `flash.sh`) |
-| Jetson AGX Orin 32 / 64 GB | `scarthgap-l4t-r36.3.0` | `jetson-agx-orin-devkit` | 🟡 recipe-compatible, untested (eMMC / NVMe via `flash.sh`) |
-| Jetson Xavier NX | `scarthgap-l4t-r35.x.x` | `jetson-xavier-nx-devkit` | 🟡 recipe-compatible, needs r35 branch |
-| Jetson AGX Xavier | `scarthgap-l4t-r35.x.x` | `jetson-agx-xavier-devkit` | 🟡 recipe-compatible, needs r35 branch |
-| Jetson Nano (legacy 4 GB) | `scarthgap-l4t-r32.x.x` | `jetson-nano-devkit` | 🟡 recipe-compatible, needs r32 branch + careful sizing (4 GB RAM is tight) |
-| Jetson AGX Thor (Blackwell) | `scarthgap-l4t-r38.x` *(pending upstream)* | `jetson-agx-thor-devkit` | 🔵 drafted on [`jetson-thor`](../../tree/jetson-thor), awaiting external tester |
-
-Legend: ✅ maintainer-booted. 🟡 recipe-compatible / untested. 🔵 on a branch pending hardware validation.
-
-**Boot paths differ across the family.** Orin Nano Devkit supports
-SD boot (what the maintainer has tested). AGX Orin / Orin NX / the
-Xavier family / legacy Nano / Thor all need NVIDIA's USB-recovery
-`flash.sh` flow for eMMC or NVMe — out of scope for the quickstart;
-see `FLASH.md` for the per-family notes, and NVIDIA's JetPack
-documentation for the authoritative flashing procedure.
-
-**MACHINE names drift across meta-tegra releases.** Verify against
-the branch you cloned:
-
-```bash
-ls ~/yocto/meta-tegra/conf/machine/ | grep -iE '(orin|xavier|nano|thor)'
-```
+> Jetson family support is on the `wip/jetson-pending-validation`
+> branch pending end-to-end hardware validation. The `main` branch
+> is Raspberry-Pi-only.
 
 #### Other ARM SBCs
 
@@ -172,14 +150,12 @@ git clone -b scarthgap https://git.yoctoproject.org/git/poky
 git clone -b scarthgap https://git.openembedded.org/meta-openembedded
 git clone -b scarthgap https://git.yoctoproject.org/git/meta-raspberrypi
 git clone https://github.com/perlowja/meta-nclawzero-base.git
-# Jetson only:
-#   git clone -b scarthgap-l4t-r36.3.0 https://github.com/OE4T/meta-tegra.git
 
 # 3. Initialize the build directory
 source poky/oe-init-build-env build
 
 # 4. Edit conf/bblayers.conf and conf/local.conf per INSTALL.md
-#    (one-time setup; MACHINE=raspberrypi4-64 or jetson-orin-nano-devkit)
+#    (one-time setup; MACHINE=raspberrypi4-64)
 
 # 5. Build
 bitbake nclawzero-base-image
@@ -217,11 +193,6 @@ plain Yocto — no exotic extensions.
 - **Raspberry Pi** — `meta-raspberrypi`:
   <https://git.yoctoproject.org/meta-raspberrypi/about/>
   Per-board variables, supported peripherals, known issues.
-- **Jetson Orin Nano** — OE4T `meta-tegra` (upstream community fork;
-  this layer builds against it, not NVIDIA-internal tegra bits):
-  <https://github.com/OE4T/meta-tegra>
-  Includes machine configs, boot artifact layouts, and NVIDIA
-  L4T-version pinning tables.
 
 ## Upstream project links
 
@@ -237,9 +208,6 @@ at build time. Nothing is redistributed through this layer.
   Ubuntu 25.10+: handled by `recipes-core/base-passwd/base-passwd_%.bbappend`
   in this layer. If it still fires, verify the bbappend is being
   picked up with `bitbake -e base-passwd | grep BBFILE`.
-- Jetson build fails at `edk2-firmware-tegra` with
-  `function declaration isn't a prototype`: add the GCC14/glibc
-  bbappend described in `INSTALL.md`.
 - NemoClaw first-boot provisioning fails on-device: the device
   needs outbound HTTPS to `github.com`. Check
   `journalctl -u nemoclaw-firstboot -f` on the target.
