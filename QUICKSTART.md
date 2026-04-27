@@ -34,16 +34,12 @@ Debian/Ubuntu container with `--privileged`, or a cloud instance.
 
 ### Target hardware (what you flash the image onto)
 
-This layer targets **ARM edge single-board computers**. It's
-BSP-agnostic within ARM — the base image builds for any `MACHINE`
-a Yocto BSP layer supports, and the agent image builds wherever
-ZeroClaw and Node.js ship prebuilt binaries (aarch64 + armv7; ARMv6
-needs a small bbappend).
-
-Non-ARM targets (x86_64, RISC-V) aren't in scope. If you need
-them, both recipes are small enough to copy and widen in your own
-layer — and upstream ZeroClaw + Node.js do ship `x86_64-linux`
-binaries, so a downstream bbappend is one override away.
+This layer targets the **ARM Raspberry Pi family**. nclawzero
+currently supports x86_64 + macOS via Docker/Podman containers
+(`ghcr.io/perlowja/nclawzero-demo`, `ghcr.io/perlowja/nclawzero-agent`)
+and ARM Raspberry Pi family boards (Pi 4, Pi 5, Pi Zero 2 W,
+Pi 3 64-bit) via Yocto-built flashable images from this layer or
+pre-built SD images from `pi-gen-nclawzero`.
 
 #### Raspberry Pi family
 
@@ -75,55 +71,7 @@ the story):
 
 #### NVIDIA Jetson
 
-> Jetson family support is on the `wip/jetson-pending-validation`
-> branch pending end-to-end hardware validation. The `main` branch
-> is Raspberry-Pi-only.
-
-#### Other ARM SBCs
-
-Anything with a Yocto BSP layer and a 64-bit or hard-float 32-bit
-Cortex-A core should work end-to-end. Add the BSP layer to
-`bblayers.conf`, set the right `MACHINE`, and build — no recipe
-changes required.
-
-| Family | BSP layer | Example boards |
-|---|---|---|
-| Rockchip | `meta-rockchip` | Radxa Rock 5 / 4 / 3, OrangePi 5, Pine RockPro64 |
-| Allwinner | `meta-sunxi` | OrangePi H-series / R-series, Cubieboard, BananaPi M1/M2 |
-| NXP i.MX | `meta-freescale` + `meta-freescale-3rdparty` | Toradex Verdin, Phytec phyBOARD, Kobol Helios64 |
-| Amlogic | `meta-meson` | ODROID-C2 / C4 / N2, Khadas VIM |
-| Mediatek | `meta-mediatek` | Genio 350/500/700 dev kits |
-| Xilinx Zynq | `meta-xilinx` | ZCU102, Kria KV260, Ultra96 |
-| TI | `meta-ti` | BeagleBone AI-64, BeaglePlay |
-| Samsung Exynos | `meta-samsung` | ODROID-XU4 (with caveats on kernel support) |
-
-#### x86 / x86_64 SBCs and mini-PCs
-
-| Target | BSP layer | MACHINE | Notes |
-|---|---|---|---|
-| Intel NUC, any x86_64 PC | `meta-intel` | `intel-corei7-64` | Full coverage of all three image variants |
-| UP Board, UP² | `meta-intel` + `meta-aaeon-bsp` | `up-*` | Same |
-| LattePanda 3 Delta | `meta-intel` | `intel-corei7-64` | Same |
-| Generic qemu x86-64 | poky default | `qemux86-64` | Useful for build validation without hardware |
-
-#### RISC-V
-
-The base image builds for any RISC-V 64-bit board via
-`meta-riscv`. The **agent image does not** — upstream ZeroClaw and
-Node.js don't ship prebuilt `riscv64` binaries today. A source
-recipe would be needed (ZeroClaw via `rust-bin`-style build,
-Node.js via the upstream `meta-nodejs` source recipe).
-
-| Board | BSP layer | MACHINE | `base` | `desktop` | `agent` |
-|---|---|---|---|---|---|
-| StarFive VisionFive 2 | `meta-riscv` | `visionfive2` | ✅ | ⚠️ kernel dep | ❌ |
-| LicheePi 4A | `meta-riscv` | `licheepi4a` | ✅ | ⚠️ | ❌ |
-| BeagleV-Ahead | `meta-riscv` | `beaglev-ahead` | ✅ | ⚠️ | ❌ |
-| SiFive HiFive Unmatched | `meta-riscv` | `unmatched` | ✅ | ❌ (no GPU) | ❌ |
-
-If you need the agent stack on RISC-V, open an issue — the fix is
-a small nodejs-source recipe plus a ZeroClaw bbappend that builds
-from the upstream crate instead of pulling a prebuilt release.
+Jetson family support is deferred pending hardware validation.
 
 ### Network (first-boot only, agent-image only)
 

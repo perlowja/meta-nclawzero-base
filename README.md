@@ -1,8 +1,7 @@
 # meta-nclawzero-base
 
-Yocto layer for building minimal Linux images for edge single-board
-computers — the **Raspberry Pi** family, plus optional AI-agent
-runtime recipes layered on top.
+Yocto layer for building minimal Linux images for the **Raspberry Pi**
+family, plus optional AI-agent runtime recipes layered on top.
 
 All recipes are ARM-universal (`COMPATIBLE_HOST = "(aarch64|arm).*-linux"`).
 The maintainer has booted Pi 4 (2 GB + 8 GB); other family members
@@ -10,10 +9,15 @@ The maintainer has booted Pi 4 (2 GB + 8 GB); other family members
 See `INSTALL.md` for the full `MACHINE` value matrix with
 tested/untested flags.
 
-> **Note:** Jetson family support is on the
-> `wip/jetson-pending-validation` branch (not pushed publicly)
-> pending end-to-end hardware validation on a known-good dev kit.
-> The `main` branch is Raspberry-Pi-only until that lands.
+nclawzero currently supports:
+
+- x86_64 + macOS via Docker/Podman containers
+  (`ghcr.io/perlowja/nclawzero-demo`, `ghcr.io/perlowja/nclawzero-agent`)
+- ARM Raspberry Pi family (Pi 4, Pi 5, Pi Zero 2 W, Pi 3 64-bit) via
+  Yocto-built flashable images from this layer or pre-built SD images
+  from `pi-gen-nclawzero`
+
+Jetson family support is deferred pending hardware validation.
 
 No pre-built images are distributed from this repository. Everything
 is built locally from upstream source and this layer's recipes.

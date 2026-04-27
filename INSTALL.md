@@ -39,9 +39,12 @@ git clone -b scarthgap https://git.yoctoproject.org/git/meta-raspberrypi
 git clone https://github.com/perlowja/meta-nclawzero-base.git
 ```
 
-> **Note:** Jetson family BSP integration (via `meta-tegra`) is on
-> the `wip/jetson-pending-validation` branch pending hardware
-> validation. `main` is Raspberry-Pi-only.
+nclawzero currently supports x86_64 + macOS via Docker/Podman
+containers (`ghcr.io/perlowja/nclawzero-demo`,
+`ghcr.io/perlowja/nclawzero-agent`) and the ARM Raspberry Pi family
+(Pi 4, Pi 5, Pi Zero 2 W, Pi 3 64-bit) via Yocto-built flashable
+images from this layer or pre-built SD images from `pi-gen-nclawzero`.
+Jetson family support is deferred pending hardware validation.
 
 ## Initialize the build
 
@@ -76,9 +79,9 @@ BBLAYERS ?= " \
 #### Supported machines
 
 All recipes in this layer are ARM-universal (`COMPATIBLE_HOST =
-"(aarch64|arm).*-linux"`) — they compile for any ARM target the
-BSP layer supports. The matrix below summarizes the known-good
-`MACHINE` values by family.
+"(aarch64|arm).*-linux"`) and are documented for Raspberry Pi targets
+while other hardware support is validated. The matrix below summarizes
+the known-good `MACHINE` values.
 
 **Raspberry Pi** (via `meta-raspberrypi` scarthgap):
 
