@@ -113,7 +113,7 @@ moves:
 
 | Component | Pin | Source |
 |---|---|---|
-| ZeroClaw | `v0.6.9` | [GitHub release SHA256](https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v0.6.9) |
+| ZeroClaw | `v0.7.4` | [GitHub release SHA256](https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v0.7.4) |
 | NemoClaw | commit `885c75b73d14f223c9cd5cd45e5274d46472b280` | [NVIDIA/NemoClaw](https://github.com/NVIDIA/NemoClaw) main @ 2026-04-23 |
 | Node.js | `22.22.2` LTS | [nodejs.org](https://nodejs.org/dist/v22.22.2/) |
 | zterm | `v0.2.0` tag | [perlowja/zterm](https://github.com/perlowja/zterm/tree/v0.2.0) |
