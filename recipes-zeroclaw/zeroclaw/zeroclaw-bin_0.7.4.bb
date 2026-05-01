@@ -24,7 +24,7 @@ HOMEPAGE = "https://github.com/zeroclaw-labs/zeroclaw"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-ZEROCLAW_VERSION = "0.7.3"
+ZEROCLAW_VERSION = "0.7.4"
 
 # Per-arch binary tuple. Override in a bbappend for Pi Zero / Pi 1.
 ZEROCLAW_TRIPLE ?= "INVALID-override-for-this-TARGET_ARCH"
@@ -42,10 +42,10 @@ SRC_URI = " \
 # :override suffixes. Override ZEROCLAW_SHA; the assignment below
 # propagates the arch-correct value to the varflag.
 # Verified against upstream SHA256SUMS at
-# https://github.com/zeroclaw-labs/zeroclaw/releases/download/v0.7.3/SHA256SUMS
+# https://github.com/zeroclaw-labs/zeroclaw/releases/download/v0.7.4/SHA256SUMS
 ZEROCLAW_SHA ?= "INVALID-override-for-this-TARGET_ARCH"
-ZEROCLAW_SHA:aarch64 = "5dbe0991914fdf29b6f3f29364aad5de20eca4bb92dd9c1491b89aef0676bcf5"
-ZEROCLAW_SHA:arm = "788351f8e42bf0b3d79c8a5d3d87cf5b8ff37cbed0bc6ce9cd22ba1df8c61fe8"
+ZEROCLAW_SHA:aarch64 = "9d49e89f74e066f85dca2e1f7f96432a7f1ce73f9ee87f64bc6e6929c273b277"
+ZEROCLAW_SHA:arm = "16d9fe037f66f53c64f24b47d12d69927b30f76bb1ea27a5228410842d042cd0"
 SRC_URI[bin.sha256sum] = "${ZEROCLAW_SHA}"
 
 COMPATIBLE_HOST = "(aarch64|arm).*-linux"
